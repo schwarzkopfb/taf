@@ -1,7 +1,7 @@
 {
   "name": "taf",
   "version": "0.0.1",
-  "description": "Follow text file changes line-by-line just like tail -f does.",
+  "description": "Follow text file changes line-by-line just like `tail -f` does.",
   "main": "index.js",
   "scripts": {
     "test": "tap test.js"

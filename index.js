@@ -1,3 +1,8 @@
+/**
+ * @module taf
+ * @exports Taf
+ */
+
 'use strict'
 
 exports = module.exports = Taf
@@ -5,6 +10,7 @@ exports = module.exports = Taf
 var fs       = require('fs'),
     path     = require('path'),
     assert   = require('assert'),
+    equal    = assert.equal,
     resolve  = path.resolve,
     dirname  = path.dirname,
     inherits = require('util').inherits,
@@ -25,7 +31,7 @@ function Taf(path, n, options) {
         return new Taf(path, n)
 
     assert(path, 'path is required')
-    assert.equal(typeof path, 'string', 'path must be a string')
+    equal(typeof path, 'string', 'path must be a string')
 
     if (n === undefined)
         n = 10
@@ -34,7 +40,7 @@ function Taf(path, n, options) {
         n       = Number(options.n) || Number(options.count) || 10
     }
     else
-        assert.equal(typeof n, 'number', 'n must be a number')
+        equal(typeof n, 'number', 'n must be a number')
 
     // todo: utf8 encoding should be enforced
 
@@ -86,6 +92,9 @@ Object.defineProperties(Taf.prototype, {
     }
 })
 
+/**
+ * Create an `fs.FSWatcher` for `this.path` and save under `this.watcher`. Follow file renames if possible.
+ */
 function setWatcher() {
     var self = this,
         path = this.path
@@ -100,11 +109,17 @@ function setWatcher() {
                 if (stats.size > self._size)
                     self._processFileChange(stats.size)
             })
+        // follow renames
         else if (event === 'rename' && filename)
             path = self.path = resolve(dirname(path), filename)
     })
 }
 
+/**
+ * Read the required `n` lines of the watched file and emit corresponding 'line' events.
+ *
+ * @param {number} newSize - The current file size. (Take this as an argument to avoid unnecessary `fs.stat()` calls.)
+ */
 function processFileChange(newSize) {
     var self = this
 
@@ -120,15 +135,27 @@ function processFileChange(newSize) {
     })
 }
 
+/**
+ * Destroy the underlying `fs.FSWatcher` instance.
+ */
 function close() {
     this.watcher.close()
 }
 
+/**
+ * Read the last `n` lines of the given file.
+ *
+ * @param {string} path - File path to read.
+ * @param {number} from - Starting byte offset.
+ * @param {number} size - Size of the file.
+ * @param {number} n - Count of lines to read.
+ * @param {function(null|Error,null|[string])} cb
+ */
 function readLastLines(path, from, size, n, cb) {
     // then stat the file to get the size
     fs.open(path, 'r', function (err, fd) {
         if (err)
-            return cb(err)
+            return cb(err, null)
 
         var buf = new Buffer(1),
             ctr = 0,
@@ -139,7 +166,7 @@ function readLastLines(path, from, size, n, cb) {
         function readChar() {
             fs.read(fd, buf, 0, 1, --pos, function (err) {
                 if (err)
-                    return cb(err)
+                    return cb(err, null)
 
                 // 10 represents '\n' in utf8
                 if (buf[ 0 ] === 10) {
@@ -166,3 +193,40 @@ function readLastLines(path, from, size, n, cb) {
         readChar()
     })
 }
+
+Object.defineProperties(exports, {
+    // exclude inherited properties if any
+    __proto__: null,
+
+    /**
+     * @prop {string} version - The version string from package manifest.
+     */
+    version: {
+        enumerable: true,
+
+        get: function () {
+            return require('./package.json').version
+        }
+    },
+
+    /**
+     * @prop {string} fs - The file system interface to use.
+     */
+    fs: {
+        enumerable: true,
+
+        get: function () {
+            return fs
+        },
+        set: function (value) {
+            assert(value, 'fs interface must be an object')
+            equal(typeof value.open, 'function', 'fs interface must have an open method')
+            equal(typeof value.stat, 'function', 'fs interface must have a stat method')
+            equal(typeof value.stat, 'function', 'fs interface must have a stat method')
+            equal(typeof value.watch, 'function', 'fs interface must have a watch method')
+            equal(typeof value.close, 'function', 'fs interface must have a close method')
+
+            fs = value
+        }
+    }
+})
