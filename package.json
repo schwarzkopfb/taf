@@ -1,0 +1,29 @@
+{
+  "name": "taf",
+  "version": "0.0.1",
+  "description": "Follow text file changes line-by-line just like tail -f does.",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/schwarzkopfb/taf.git"
+  },
+  "keywords": [
+    "tail",
+    "f",
+    "tailf",
+    "follow",
+    "file",
+    "change",
+    "watch",
+    "text"
+  ],
+  "author": "Schwarzkopf Balazs <schwarzkopfb@icloud.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/schwarzkopfb/taf/issues"
+  },
+  "homepage": "https://github.com/schwarzkopfb/taf#readme"
+}
