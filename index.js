@@ -16,14 +16,18 @@ var fs       = require('fs'),
     inherits = require('util').inherits,
     EE       = require('events').EventEmitter,
     bytes    = require('bytes').parse
+
 /**
  * Construct a `Taf` instance to monitor file changes line-by-line.
+ *
+ * todo: what about `[options.handleRename=true]`?
  *
  * @param {string} path - The file path to watch.
  * @param {number} [n=10] - Count of lines to read from the file before subscribing for changes. Same as '-n' param for `tail(1)`.
  * @param {object} [options] - Settings for this `Taf` instance plus options to pass to `fs.watch()`.
  * @param {number} [options.count=10] - Set `n` argument but via an options object.
  * @param {number|string} [options.bufferSize=1024] - Size of the read buffer to use. `bytes` module is used to parse the value.
+ * todo: docs: Buffer size should be as close as possible to the expected average file change size to gain the best performance.
  * @returns {Taf}
  */
 function Taf(path, n, options) {
@@ -63,11 +67,9 @@ function Taf(path, n, options) {
     this.options    = options
     this.bufferSize = options.bufferSize
 
-    Object.defineProperties(this, {
-        _size: {
-            writable: true,
-            value:    0
-        }
+    Object.defineProperty(this, '_size', {
+        writable: true,
+        value:    0
     })
 
     var self = this
@@ -128,7 +130,7 @@ function setWatcher() {
 /**
  * Read the required `n` lines of the watched file and emit corresponding 'line' events.
  *
- * @param {number} newSize - The current file size. (Take this as an argument to avoid unnecessary `fs.stat()` calls.)
+ * @param {number} newSize - The current file size. (Take size as an argument to avoid unnecessary `fs.stat()` calls.)
  */
 function processFileChange(newSize) {
     var self = this
@@ -157,12 +159,12 @@ function close() {
  *
  * @param {string} path - File path to read.
  * @param {number} from - Starting byte offset.
- * @param {number} size - Size of the file.
+ * @param {number} pos - Size of the file.
  * @param {number} n - Count of lines to read.
  * @param {function(null|Error,null|[string])} cb
  */
-function readLastLines(path, from, size, n, cb) {
-    // then stat the file to get the size
+function readLastLines(path, from, pos, n, cb) {
+    // get a file descriptor for the given file
     fs.open(path, 'r', function (err, fd) {
         if (err)
             return cb(err, null)
@@ -171,8 +173,7 @@ function readLastLines(path, from, size, n, cb) {
         var buf = new Buffer(1),
             ctr = 0,
             cur = '',
-            res = [],
-            pos = size
+            res = []
 
         function readChar() {
             fs.read(fd, buf, 0, 1, --pos, function (err) {
@@ -180,6 +181,7 @@ function readLastLines(path, from, size, n, cb) {
                     return cb(err, null)
 
                 // 10 represents '\n' in utf8
+                // todo: '\r'
                 if (buf[ 0 ] === 10) {
                     // do not add the default `cur = ''` as a line
                     if (ctr)
