@@ -1,2 +1,2 @@
 # taf
-Tail-A-File in node, just like `tail -f` does.
+Tail-A-File in [node](https://nodejs.org), just like `tail -f` does.
