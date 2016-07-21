@@ -235,7 +235,6 @@ Object.defineProperties(exports, {
             assert(value, 'fs interface must be an object')
             equal(typeof value.open, 'function', 'fs interface must have an open method')
             equal(typeof value.stat, 'function', 'fs interface must have a stat method')
-            equal(typeof value.stat, 'function', 'fs interface must have a stat method')
             equal(typeof value.watch, 'function', 'fs interface must have a watch method')
             equal(typeof value.close, 'function', 'fs interface must have a close method')
 
