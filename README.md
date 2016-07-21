@@ -1,2 +1,2 @@
 # taf
-Follow text file changes line-by-line just like tail -f does.
+Tail-A-File in node, just like `tail -f` does.

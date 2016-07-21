@@ -80,7 +80,7 @@ function Taf(path, n, options) {
             if (err)
                 return self.emit('error', err)
 
-            // todo: the first line does not cause a 'line' event
+            // todo: the first line does not cause a 'line' event. why?
             self._processFileChange(stats.size)
             self._setWatcher()
         })
@@ -105,7 +105,7 @@ Object.defineProperties(Taf.prototype, {
 })
 
 /**
- * Create an `fs.FSWatcher` for `this.path` and save under `this.watcher`. Follow file renames if possible.
+ * Create an `fs.FSWatcher` for `this.path` and save that under `this.watcher`. Follow file renames if possible.
  */
 function setWatcher() {
     var self = this,
