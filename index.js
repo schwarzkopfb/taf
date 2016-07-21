@@ -64,7 +64,7 @@ function Taf(path, n, options) {
 
     this.path       = path
     this.count      = n
-    this.options    = options
+    this.options    = Object.freeze(options)
     this.bufferSize = options.bufferSize
 
     Object.defineProperty(this, '_size', {
