@@ -3,6 +3,9 @@
   "version": "0.0.1",
   "description": "Follow text file changes line-by-line just like `tail -f` does.",
   "main": "index.js",
+  "files": [
+    "index.js"
+  ],
   "scripts": {
     "test": "tap test.js"
   },
@@ -25,5 +28,8 @@
   "bugs": {
     "url": "https://github.com/schwarzkopfb/taf/issues"
   },
-  "homepage": "https://github.com/schwarzkopfb/taf#readme"
+  "homepage": "https://github.com/schwarzkopfb/taf#readme",
+  "dependencies": {
+    "bytes": "^2.4.0"
+  }
 }

@@ -14,8 +14,8 @@ var fs       = require('fs'),
     resolve  = path.resolve,
     dirname  = path.dirname,
     inherits = require('util').inherits,
-    EE       = require('events').EventEmitter
-
+    EE       = require('events').EventEmitter,
+    bytes    = require('bytes').parse
 /**
  * Construct a `Taf` instance to monitor file changes line-by-line.
  *
@@ -42,17 +42,26 @@ function Taf(path, n, options) {
     else
         equal(typeof n, 'number', 'n must be a number')
 
-    // todo: utf8 encoding should be enforced
-
     if (!options)
-        options = {}
+        options = {
+            bufferSize: 1024
+        }
+    else {
+        if (options.encoding !== undefined)
+            equal(options.encoding, 'utf8', 'only UTF-8 encoding is supported')
+
+        if (options.bufferSize !== undefined) {
+            var bs = options.bufferSize = bytes(options.bufferSize)
+            assert(!isNaN(bs), 'invalid bufferSize provided')
+        }
+    }
 
     EE.call(this)
 
-    this.path    = path
-    this.count   = n
-    this.options = options
-    // todo: bufferSize
+    this.path       = path
+    this.count      = n
+    this.options    = options
+    this.bufferSize = options.bufferSize
 
     Object.defineProperties(this, {
         _size: {
@@ -69,6 +78,7 @@ function Taf(path, n, options) {
             if (err)
                 return self.emit('error', err)
 
+            // todo: the first line does not cause a 'line' event
             self._processFileChange(stats.size)
             self._setWatcher()
         })
@@ -157,6 +167,7 @@ function readLastLines(path, from, size, n, cb) {
         if (err)
             return cb(err, null)
 
+        // todo: use bufferSize
         var buf = new Buffer(1),
             ctr = 0,
             cur = '',
