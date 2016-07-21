@@ -32,7 +32,7 @@ var fs       = require('fs'),
  */
 function Taf(path, n, options) {
     if (!(this instanceof Taf))
-        return new Taf(path, n)
+        return new Taf(path, n, options)
 
     assert(path, 'path is required')
     equal(typeof path, 'string', 'path must be a string')
